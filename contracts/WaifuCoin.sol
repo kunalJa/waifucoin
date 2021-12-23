@@ -9,6 +9,10 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
  * Features: ...
  */
 contract WaifuCoin is IERC20, IERC20Metadata {
+    uint256 private supply; // potentially not needed if we keep a fixed supply
+    mapping(address => uint256) private balances;
+    mapping(address => mapping(address => uint256)) allowances;
+
     /**
      * @dev Optional name parameter for metadata.
      * Implemented as pure instead of view
@@ -31,5 +35,62 @@ contract WaifuCoin is IERC20, IERC20Metadata {
      */
     function decimals() external pure returns (uint8) {
         return 18;
+    }
+
+    function totalSupply() external view returns (uint256) {
+        return supply;
+    }
+
+    function balanceOf(address _account) external view returns (uint256) {
+        return balances[_account];
+    }
+
+    function _transfer(
+        address _sender,
+        address _recipient,
+        uint256 _amount
+    ) private {
+        balances[_sender] -= _amount;
+        balances[_recipient] += _amount;
+        emit Transfer(_sender, _recipient, _amount);
+    }
+
+    function transfer(address _recipient, uint256 _amount)
+        external
+        returns (bool)
+    {
+        // EIP-20 requires the function 'throw' if the message caller's account balance does not have enough tokens to spend.
+        require(balances[msg.sender] >= _amount);
+        _transfer(msg.sender, _recipient, _amount);
+        return true;
+    }
+
+    function approve(address _spender, uint256 _amount)
+        external
+        returns (bool)
+    {
+        allowances[msg.sender][_spender] = _amount;
+        emit Approval(msg.sender, _spender, _amount);
+        return true;
+    }
+
+    function allowance(address _owner, address _spender)
+        external
+        view
+        returns (uint256)
+    {
+        return allowances[_owner][_spender];
+    }
+
+    function transferFrom(
+        address _sender,
+        address _recipient,
+        uint256 _amount
+    ) external returns (bool) {
+        require(allowances[_sender][msg.sender] >= _amount);
+        require(balances[_sender] >= _amount);
+        _transfer(_sender, _recipient, _amount);
+        allowances[_sender][msg.sender] -= _amount;
+        return true;
     }
 }
