@@ -82,6 +82,9 @@ contract WaifuCoin is IERC20, IERC20Metadata {
         return allowances[_owner][_spender];
     }
 
+    /**
+     * @dev https://docs.google.com/document/d/1YLPtQxZu1UAvO9cZ1O2RPXBbT0mooh4DYKjA_jp-RLM/edit
+     */
     function transferFrom(
         address _sender,
         address _recipient,
