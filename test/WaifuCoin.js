@@ -103,4 +103,35 @@ describe("Token contract", function () {
         expect(addr2Balance).to.equal(50);
       });
     });
+
+    describe("Approvals", function() {
+        it("Should let a signer appoint another signer to handle its funds", async function () {
+            const ownerBalance = await hardhatToken.balanceOf(owner.address);
+            await expect(hardhatToken.approve(addr1.address, ownerBalance)).to.emit(hardhatToken, 'Approval').withArgs(owner.address, addr1.address, ownerBalance);
+            
+            const addr1Allowance = await hardhatToken.allowance(owner.address, addr1.address);
+            expect(addr1Allowance).to.equal(ownerBalance);
+        });
+
+        it("Should allow the new handler to transfer funds", async function () {
+            const initialOwnerBalance = await hardhatToken.balanceOf(owner.address);
+            await hardhatToken.approve(addr1.address, initialOwnerBalance);
+            await hardhatToken.connect(addr1).transferFrom(owner.address, addr2.address, 50);
+
+            const addr2Balance = await hardhatToken.balanceOf(addr2.address);
+            expect(addr2Balance).to.equal(50);
+
+            const finalOwnerBalance = await hardhatToken.balanceOf(owner.address);
+            expect(finalOwnerBalance).to.equal(initialOwnerBalance.sub(50));
+        });
+
+        it("Should reduce the allowance after transfering", async function () {
+            const initialOwnerBalance = await hardhatToken.balanceOf(owner.address);
+            await hardhatToken.approve(addr1.address, initialOwnerBalance);
+            await hardhatToken.connect(addr1).transferFrom(owner.address, addr2.address, 50);
+            const finalOwnerBalance = await hardhatToken.balanceOf(owner.address);
+            const addr1Allowance = await hardhatToken.allowance(owner.address, addr1.address);
+            expect(addr1Allowance).to.equal(finalOwnerBalance);
+        });
+    });
   });
