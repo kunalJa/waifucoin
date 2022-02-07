@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.0;
 
+import "hardhat/console.sol";
+
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
@@ -64,6 +66,8 @@ contract WaifuCoin is IERC20, IERC20Metadata {
         external
         returns (bool)
     {
+        console.log("Sender balance is %s tokens", balances[msg.sender]);
+        console.log("Trying to send %s tokens to %s", _amount, _recipient);
         // EIP-20 requires the function 'throw' if the message caller's account balance does not have enough tokens to spend.
         require(balances[msg.sender] >= _amount);
         _transfer(msg.sender, _recipient, _amount);
