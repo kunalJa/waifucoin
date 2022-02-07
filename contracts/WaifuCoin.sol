@@ -9,9 +9,14 @@ import "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
  * Features: ...
  */
 contract WaifuCoin is IERC20, IERC20Metadata {
-    uint256 private supply; // potentially not needed if we keep a fixed supply
     mapping(address => uint256) private balances;
     mapping(address => mapping(address => uint256)) allowances;
+
+    constructor() {
+        // The totalSupply is assigned to transaction sender, which is the account
+        // that is deploying the contract.
+        balances[msg.sender] = 1_000_000 * (10 ** uint256(18));
+    }
 
     /**
      * @dev Optional name parameter for metadata.
@@ -37,8 +42,8 @@ contract WaifuCoin is IERC20, IERC20Metadata {
         return 18;
     }
 
-    function totalSupply() external view returns (uint256) {
-        return supply;
+    function totalSupply() external pure returns (uint256) {
+        return 1_000_000 * (10 ** uint256(18));
     }
 
     function balanceOf(address _account) external view returns (uint256) {
